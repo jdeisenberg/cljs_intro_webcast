@@ -1,0 +1,526 @@
+In this webcast, I'm going to introduce some of the key concepts of functional programming using the ClojureScript language by writing two small programs that interact with web pages.
+
+First, let's get some terminology:
+
+Clojure: a dialect of Lisp that runs on the JVM.
+ClojureScript: a dialect of Clojure that compiles to JavaScript
+ClojureScript: also the name of the compiler
+
+In this webcast, I'll use Clojurescript to refer to the language.
+
+[slide of Leiningen]
+So, let's start using ClojureScript. To save some time, I've already set up my system by going to Leiningen.org and installing it as per the instructions. 
+
+[slide of editors]
+I needed a text editor. Although any text editor will do, some editors are very good at handling Clojure and Clojurescript (for example, IntelliJ Idea with the Cursive plugin); for this webcast I'm using Notepad++ on Windows.
+
+[slide of browsers]
+Finally, I needed a browser. Either Chrome or Firefox will do quite well.
+
+[slide of commands]
+I then created a new project named "example" using the "figwheel" plugin. Figwheel sets up a web server to display an HTML page. It also monitors your source files and automatically recompiles and reloads the compiled JavaScript code when it detects a change in the files.
+
+[slide showing directory structure]
+The project that figwheel builds has a "project.clj" file which gives the configuration and dependencies for your project. We won't be looking at that in any depth.
+
+There's a minimal HTML page in the resources/public directory, and a minimal ClojureScript program in the src/core.cljs file.
+
+[slide of REPL]
+Let's start with the REPL - the Read/Evaluate/Print/Loop that lets you interactively try out ClojureScript concepts.
+
+To start the REPL, I type lein figwheel. If you're on Linux, install the "rlwrap" utility on your system, and type rlwrap lein figwheel to enable the up and down arrow keys to page through your command history, and left and right to edit wthin a line (This happens automagically on Windows). Then open localhost:3449 in the browser.
+
+[switch to screen share]
+The heart of ClojureScript is the EXPRESSION. An expression consists of an open parenthesis, a function name, its arguments (if any), and a closing parenthesis.
+
+Addition is a function, so you can do addition this way:
+  (+ 12 30)
+
+And a multiplication: (* 533 2)
+
+Arithmetic functions can take more than two arguments:
+
+   (* 13 41 2)
+
+And, of course, you can nest expressions:
+
+   (+ (* 3 4) (/ 30 6))
+
+There are other math and boolean functions:
+
+  (mod 39 4)
+  (quot 15 2)
+  (even? 42)
+  (> 5 7)
+
+[slide]
+Now, let's talk about variables. In JavaScript, when you say x = 8, that means there's a memory location labeled X that has an 8 stored in it.
+
+[slide]
+When you say x = 9, the number stored in that location changes.
+
+[slide]
+But in functional programming, you don't think that way.
+
+[slide x = 8]
+Instead, variables act as they do in algebra: "the symbol x stands for 8; wherever you have an 8 you can use x, and vice versa."
+
+[slide x = 9]
+And if, in the middle of the calculation, you say "now x == 9"
+
+[slide U no can do that]
+"U NO CAN DO THAT!"
+
+[slide (def x 8)]
+Here's how you say that the symbol x stands for 8 in ClojureScript.
+
+[back to REPL]
+
+  (def x 8)
+
+And, sure enough, that's what x stands for:
+
+   x
+   
+   (= x (+ 6 2))
+
+Here's a very important point: If I pass X into a function that increments its argument:
+
+   (inc x)
+   
+The result is 9 -- but x is NOT changed it's an IMMUTABLE VARIABLE. 
+
+   x
+
+Once the symbol is associated, or *BOUND TO* a value, it stays that way.
+
+[slide]
+The "inc" function works just like the ones you learned in algebra. A function is like a "black box" where you put in some input, magick occurs, and you receive some output (without altering the input)
+
+[slide]
+In functional programming, you think of functions as a way to transform data. So, to get the hypotenuse of a right triangle, you  use the x-squared function to the transform the values for the two legs, use addition function to transform that to a sum, and then transform it to the desired result with the square root function.
+
+[slide of def]
+Here's the model for defining a function: you define a symbol and associate it with a value. That value is a function with parameters and a body.
+
+[slide with concrete def]
+That's rather abstract; here's a function for squaring a number.
+
+[slide with defn]
+Because defining functions is so common, there's a short form for it.
+
+[return to REPL]
+Let's give it a shot:
+
+   (def square (fn [x] (* x x)))
+   (square 3)
+   (square x)
+   
+   (defn cube [a] (* a a a))
+   (cube 3)
+   (cube x)
+
+So now we can do almost everything in the "function chain" from a few slides ago:
+
+   (+ (square 3) (square 4))
+   
+ClojureScript doesn't have a built-in square root function, so we need to use the square root function from JavaScript's Math object. 
+
+[slide with accessing JS methods]
+Here's the generic form of accessing a method, plus an example. Remember the leading . on the method name. The "js/" indicates that the symbol Math belongs to JavaScript.
+
+[slide with shortcuts]
+If you like, you can use the shortcut syntax to save a bit of typing, especially for methods that belong to the Window object.
+
+[slide with accessing JS properties]
+To access a property, precede the name with .- (sorry, no shortcuts here!)
+
+[slide for creating objects]
+To create an object, follow its class name with a dot and any arguments it may need.
+
+Let's give it a try in the REPL.
+
+[switch to REPL]
+  (.sqrt js/Math 2)
+  (js/Math.sqrt 2)
+  (.-PI js/Math)
+  (.getFullYear (js/Date.))
+
+Now we can put together a pythagorean theorem function. We could keep doing everything in the REPL, but it's time we started adding code to the project.
+
+[go to editor]
+
+Let's take a look at the core.cljs file in the src/example directory. The first line establishes a *namespace* for the functions in the file. Two functions with the same name can be differentiated by specifying which namespace they belong to. The "^:figwheel-always" is  meta-data that tells figwheel to always reload when the file changes.  The :require function loads libraries for use in your code.
+
+The (enable-console-print!) function allows the (println) function to emit output to the JavaScript console in your browser. The exclamation point at the end of the function name is a clojurescript convention that means "this function is not a pure function; it has a side effect". Functions like cube and square and the built-in arithmetic functions, are PURE functions - put in the same input, and you get the same output, every time. The methods of JavaScript's Date object are not pure functions; you get different results depending on when you call them.
+
+The line starting (defonce ...) defines an "atom". Atoms are used to manage shared state data; we won't be needing that in this webcast. The on_js_reload function is not needed here either, so let's skip that for now.
+
+Add the square and pythagoras functions to the src/example/core.cljs file:
+
+  (def square (fn [x] (* x x)))
+
+  (defn pythagoras [a b]
+    (.sqrt js/Math (+ (square a) (square b))))
+
+When you save the file, you'll see an icon that shows that the compile succeeded. Just for fun, let's make an error on purpose to see what happens. I'll add an extra closing parenthesis on the definition of "square" [do so], save the file, and see the error in the browser.
+
+In the REPL, you can use the fully qualified name:
+
+  (example.core/pythagoras 3 4)
+  
+or you can go into the appropriate namespace:
+
+  (in-ns 'example.core)
+  
+That single quote on the 'example.core isn't a mistake. In Clojurescript it means "don't try to evaluate this symbol; take it exactly as it is."
+
+Now you can use the function name directly
+
+  (pythagoras 1 4)
+  
+Let's hook up these functions with a web page. In the resources/public_html/ directory, add this to the body of the
+index.html page
+
+   <p>
+   A: <input type="text" id="A"/>
+   B: <input type="text" id="B"/>
+   C: <span id="C"></span>
+   </p>
+   <p>
+   <input type="button" id="calculate" value="Calculate"/>
+   </p>
+
+[slide of functions we need]
+Before we just start to write code, let's think about what additional functions we need. I'll need one function to get the value from a field by its ID, and another to convert that string to a number.
+
+Here's the get-value function:
+
+(defn get-value [id-string]
+  (.-value (.getElementById js/document id-string)))
+  
+By the way, this is a non-pure function -- you may get a different result every time you call it.
+
+When converting a string to a number, what should happen with invalid input (like "xyz")? I have made the unilateral decision that IF an item isn't valid, it should become zero.  This is a rather ham-handed way of saying that I need some sort of "if" expression
+
+[slide for "if"]
+and here's how you write an if-expression in ClojureScript.
+
+[slide with to-number]
+And here's to-number:
+
+(defn to-number [str]
+  (if (js/isNaN (js/parseFloat str))
+    0
+    (js/parseFloat str)))
+    
+There's nothing inherently wrong with this code; it works as advertised. However, it may have to parse the string twice; once for the if and again if the if comes out false.  This is the place where we would like to have the moral equivalent of a *LOCAL VARIABLE*, and, you can do it with the "let" construct:
+
+[slide with let]
+In the "let" special form, you specify, in square brackets, a series of symbols and their values. (These are officially referred to as "bindings").  The bindings are followed by one or more expressions that can use those bindings. The value of the function is the value of the last expression.
+
+[slide with to-number, new version]
+Now you can create a better version of to-number
+
+(defn to-number [str]
+  (let [n (js/parseFloat str)]
+    (if (js/isNaN n) 0 n)))
+   
+[slide with def vs let]
+Here's the difference between def and let: def binds a symbol to a value and makes that symbol available to all functions in the namespace. 
+
+Let creates bindings that exist only until the end of the let clause, so they are like local variables.
+
+[back to the editor]
+Now let's add those functions to the core.cljs file.
+
+  (defn get-value [id-string]
+    (.-value (.getElementById js/document id-string)))
+
+The next step is to add an event handler to the calculate button:
+
+(.addEventListener (.getElementById js/document "calculate") "click" calculate!)
+
+Now I'll write that event handler, which is a function that takes one argument: the event. In ClojureScript, functions need to be defined before they're used, so I have to put this code before
+the addEventListener.
+
+(defn calculate! [evt]
+
+Make some temporary variables with let:
+   (let [a (to-number (get-value "A"))
+         b (to-number (get-value "B"))]
+
+And store the result in the <span>:
+
+   (set! (.-innerHTML (js/document.getElementById "C")) (pythagoras a b))
+   
+and complete the parentheses:
+  ))
+
+
+[demo the application]
+
+OK, that works. You can now write programs that work with individual numbers. However, the JavaScript world has collections of numbers and objects (arrays), and you need to be able to handle them.  ClojureScript doesn't just have arrays; it has:
+
+[slide of collections]
+
+You've been working with lists all along. Every expression is a list. To define a list where the first item isn't a function, you either use the single quote to mean "take this as is; don't try to evaluate it", or you use the explicit list function.
+
+[slide of vector]
+
+A vector has its elements enclosed in square brackets, or you can use the (vector) function. The difference between lists and vectors is that lists are efficient for sequential access; if you need quick access to an arbitrary item, use  vector.
+
+[map]
+A map is a collection of key-and-value pairs, much like a Python dictionary, or a Ruby or Perl hash.
+
+[set]
+And a set is a collection of unique values, in no particular order.
+
+For the next project, we'll only use vectors.
+
+[slide showing stats user interface]
+The goal of this project is to calculate the mean and standard deviation of a set of numbers entered into a web page.
+
+[slide of acquiring data]
+Before starting to code, let's think about the transformations we'll need to do on the data.
+
+The input string has to be transformed into a vector of individual items. Then those items need to be converted to numbers (because adding strings doesn't do what you want!), and then we have to get rid of any strings that really *weren't* numbers!
+
+[slide of formulas]
+Once you have the numbers, you have to calculate the mean and standard deviations. Here are the formulas . (The last one is not as scary as it looks.)
+
+[slide of reductions]
+So, you have to take the list of numbers and reduce it to several single numbers: the count, the sum, and the sum of squares.
+
+[back to REPL]
+First, I'll get out of the REPL by CTRL-C.
+ 
+Then create a new project to calculate the mean and standard deviation of a set of numbers.
+
+	[type]
+	cd ..
+	lein new figwheel stats
+	cd stats
+
+And then start figwheel. 
+
+    lein figwheel
+
+Linux / Mac OS X users, remember to use rlwrap at the beginning of your command:
+
+   lein figwheel
+   This takes a few moments, so are there any questions?
+	
+Our first transformation of input data will be to split the string
+To split the string, we could use the JavaScript .split function, but let's go with a ClojureScript function instead.
+
+[back to the editor]
+In your core.cljs file, add to the "require" clause:
+
+  (:require [clojure.string :as str])
+  
+This brings in the Clojure String library, and lets you use "str" as an abbreviation rather than having to type "clojure.string" all the time.
+
+In the browser, let's reload the page to connect to the new project.
+
+Then back to the REPL, and let's get into the correct name space:
+
+  (in-ns 'stats.core)
+  
+To get the same shortcut for the string library, you type this in the REPL:
+
+  (require '[clojure.string :as str])
+  
+Let's define the input string, for our convenience:
+
+  (def input "1, 3, x, 7, 5")
+
+And then use the Clojure string's split function to split the string anywhere you find one or more commas and/or blanks. The thing you want to split on is a REGULAR EXPRESSION, which, in ClojureScript, is written as a string preceded by a hash sign.
+
+ (def items (str/split input #"[, ]+"))
+   
+Hurray! We have our list of individual strings.
+
+Now you need to transform this vector of strings into a collection of numbers by applying parseFloat to each of them. 
+
+[slide of map]
+This is what the MAP function in ClojureScript does. You give it a function and a collection, and it gives you back a new collection that has the function applied to each item in the collection.
+
+[slide with f highlighted]
+There's something really important going on here: One of the arguments to the "map" function is---a function. When you can pass functions to other functions as arguments, you have what are called "higher order functions"  (In fact, not only can you pass functions as arguments, you can have functions that give back a new function as their result.)
+
+[slide of square]
+So, here's an example that maps the "square" function across a list of numbers:
+
+[go to editor]
+Let's add the square function to core.cljs
+  (defn square [x] (* x x))
+  
+[go to REPL]
+And now we can try it out:
+  (map square [12 4 1.5 9])
+
+By the way, for a short function, you don't need to use a named function -- you can use the "fn" form that we looked at earlier. This is called an ANONYMOUS FUNCTION or a LAMBDA, by the way. For example, if I wanted to get the cube of all the items in the list:
+
+ (map (fn [a] (* a a a)) [12 4 1.5 9])
+
+Knowing this, you can get the numbers from the input string (no, I haven't forgotten about it):
+
+ (def all-numbers (map js/parseFloat items))
+
+And there are the items in numeric form. Except for "x", which isn't a number, and gave us "Not A Number". 
+
+You can select desired elements using ClojureScript's FILTER function.
+
+[slide of filter]
+Filter takes two arguments: a function and a collection. The function, also called a "predicate", is a function of one argument that returns either true or false.  This slide shows how you can filter only the even numbers in a collection using the built-in "even?" function. (By ClojureScript convention, functions ending with a question mark return a true or false.)
+
+[back to editor]
+So let's write a predicate that says a valid number is one that *ISN'T* "not a number"
+
+  (defn valid? [x] (not (js/isNaN x)))
+  
+[back to REPL]
+
+Let's try it:
+
+  (valid? -3)
+  (valid? (js/parseFloat "x"))
+  (def numbers (filter valid? all-numbers))
+      
+Notice that you can do this all at one go:
+
+  (filter valid? (map js/parseFloat (str/split input #"[, ]+")))
+   
+[slide of formulas]
+Now that we have the numbers, we can calculate the mean and standard deviation.
+
+[slide of necessary reductions]
+To do this, we need to do some reductions to get the number of items, their sum, and the sum of squares.
+
+[slide of count]
+To get the number of items, you just use the "count" function:
+
+(count numbers)
+
+To get the sums, you use the "reduce" function.
+
+[slide of plain reduce]
+The reduce function takes three arguments: 
+
+[slide showing fcn highlighted] the first is a function that accumulates the final result, 
+
+[slide showing zero highlighted] the second is a starting value, 
+
+[slide showing last arg] and the last argument is the input sequence. 
+
+[slide showing fcn]
+The function you passed to map had only one parameter, but the function you give to reduce must have two parameters. The first contains the accumulated result, and the second is the current item being processed in the sequence. 
+
+[slide showing result of 5]
+At the start of the reduce process, the function is called with the starting value and the first item in the sequence. So, here, the "accumulated value" is zero, and the item in question is 5. The function is applied to those items; in this case, the result is 0 plus 5: 5
+
+[slide showing result of 9]
+Reduce then moves on to the next item in the sequence. This time, the "result so far" is the result from the previous function call:   5 plus 4 is 9.
+
+[slide showing result of 15]
+Reduce moves on, and again, the previous result becomes the "result so far" argument. 9 plus 6 is 15, and since that's the last item in the sequence,
+
+[slide showing final result] that's the result of the reduction.
+
+[slide showing reduce +]
+Of course, you would normally just use "+" as a function. Remember, it *is* a function that takes two arguments -- the two items you want to add together.
+
+[back to REPL]
+Let's give it a try in the repl, with our numbers:
+
+Here are the numbers:
+   numbers 
+   
+And their sum:
+
+  (reduce + 0 numbers)
+  
+So we could get the sum of squares in two different ways:
+
+  (reduce + 0 (map square numbers))
+  
+Or we could write a reducing function that accumulates the sum of the squares:  
+
+  (defn sumsq [acc x] (+ acc (* x x)))
+  
+...and use it.
+
+  (reduce sumsq 0 numbers)
+  
+and, because the reducing function is so short, we could write it in-line:
+
+  (reduce (fn [acc x] (+ acc (* x x))) 0 numbers)
+  
+Whichever way you want to write it is fine with me.
+
+Now that we have all the parts, let's put them together.
+
+[back to editor]
+I'm going to copy/paste the HTML from the setup URL to save myself some typing.
+
+and then edit the core.cljs file
+
+First, the function to calculate the mean:
+
+  (defn mean [numbers]
+    (let [n (count numbers)
+          sum (reduce + 0 numbers)]
+      (if (> n 0) (/ sum n) 0)))
+
+Next, the standard deviation:
+
+  (defn stdv [numbers]
+    (let [n (count numbers)
+          sum (reduce + 0 numbers)
+          sumsq (reduce + (map square numbers))]
+      (if (> n 0)
+        (js/Math.sqrt (/ (- sumsq (/ (square sum) n)) (- n 1))) 0)))
+
+To make our lives easier, a shorthand for getting an element by ID:
+
+  (defn by-id [id]
+    (js/document.getElementById id))
+    
+We can test these in the REPL:
+  
+  (mean [1 3 7 5])
+  (stdv [1 3 7 5])
+  (by-id "numbers")
+
+All these functions are pure; given the same input, they'll always give the same output.
+
+Now we have the "calculate" function. This does all the impure operations; reading input and writing output. This is a common way of working in ClojureScript -- keep some logical separation between pure and impure functions.
+
+  (defn calculate! [evt]
+    (let [input (.-value (by-id "numbers"))
+          numbers (filter valid?
+                          (map js/parseFloat
+                               (str/split input #"[, ]+")))]
+... and set the result <span> elements:
+      (set! (.-innerHTML (by-id "mean")) (mean numbers))
+      (set! (.-innerHTML (by-id "stdv")) (stdv numbers))))
+
+Finally, add an event listener:
+
+(.addEventListener (js/document.getElementById "calculate') "click" calculate!)
+
+and we're ready to give it a try.
+
+And it works!
+
+[slide of dom/dommy]
+We've just scratched the surface of ClojureScript. For example, we accessed them DOM directly through JavaScript methods. There are many different libraries you can use to access your web page in a way that is more "clojurescript-ish".
+
+[slide of collection fcns]
+Although you can do a *lot* of useful things with map, filter, and reduce, there are plenty of other functions that work with collections that will make your work easier. (No, you don't have to use all of these. It's like the Sunday New York Times - you can't read it all, but it's good to know that it's all there.)
+
+[slide of where to go from here docs]
+And here are some links to other documentation.
+
+So, any questions?
