@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+  <head>
+    <link rel="stylesheet" type="text/css" href="style.css"
+      media="screen" />
+    <link rel="stylesheet" type="text/css" href="printstyle.css"
+      media="print" />
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>Webcast Setup</title>
+    <style type="text/css">
+    th, td {
+      border: 1px solid gray;
+      border-spacing: 0;
+      padding: 0.5em;
+    }
+    </style>
+  </head>
+
+<body>
+<h1>Webcast Setup</h1>
+<p>
+I&#8217;m going to be writing a small program during the webcast. Here&#8217;s how to set up your system if you&#8217;d like to work along with me.
+</p>
+
+<h2>What is ClojureScript?</h2>
+<p>
+Clojure is a dialect of Lisp that runs on the Java Virtual Machine. ClojureScript is the name for: 
+</p>
+<ul>
+  <li>the language: a dialect of Clojure that targets JavaScript as a deployment platform, and</li>
+  <li>the compiler: the program that compiles Clojure to JavaScript</li>
+</ul>
+
+<h2>Get Java 8</h2>
+<p>
+The ClojureScript compiler is written in Java, so make sure you have Java 8 installed. If you aren&#8217;t sure if you have Java, type this from a command prompt:
+</p>
+
+<div class="inset bordered"><pre>java -version</pre></div>
+
+<p>
+You should see something like this as a result:
+</p>
+
+<div class="inset bordered"><pre>java version "1.8.0_40"
+Java(TM) SE Runtime Environment (build 1.8.0_40-b26)
+Java HotSpot(TM) 64-Bit Server VM (build 25.40-b25, mixed mode)</pre></div>
+
+<p>
+If you get an error message or you don&#8217;t have Java 8, go to <a href="http://www.oracle.com/technetwork/java/javase/downloads/index.html">Oracle&#8217;s Java download page</a>, get the version of the Java Runtime Environment (JRE) or Java Development Kit (JDK) for your system, and install it according to their instructions.
+</p>
+
+<h2>Get Leiningen and Create a Project</h2>
+<p>
+Leiningen is a script that automates the building of Clojure and ClojureScript projects. Go to <a href="http://leiningen.org/">leiningen.org</a> and install the Leiningen script as per the instructions on that website.
+</p>
+
+<p>
+In the webcast, I&#8217;ll be using a Leiningen plugin named <em>figwheel</em> that builds your ClojureScript and automatically loads it into the browser when you save a changed version of your source files. Create a directory for the webcast, change to that directory, and create a figwheel project named <em>example</em>. Here is the sequence of commands:
+</p>
+
+<div class="inset bordered"><pre>mkdir webcast
+cd webcast
+lein new figwheel example</pre></div>
+
+<h2>Mac OSX or Linux</h2>
+<p>
+Install the <code>rlwrap</code> utility. This utility will let you use the arrow keys to move up and down through command history and left and right to edit within a line when using ClojureScript in its interactive mode. On Mac OSX, use Homebrew or MacPorts to install; on Linux, use your distribution&rsquo;s package manager.
+</p>
+
+<h2>Get a Text Editor</h2>
+<p>
+Any text editor will do for this webcast. Here are several choices, in case you don&#8217;t have a favorite already.
+</p>
+
+<table>
+  <tbody>
+  <tr><td><a href="http://jedit.org/">jEdit</a></td>
+    <td>Cross-platform (written in Java)</td></tr>
+  <tr><td><a href="http://geany.org/">Geany</a></td>
+    <td>Cross-platform</td></tr>
+  <tr><td><a href="https://notepad-plus-plus.org/">Notepad++</a></td>
+    <td>Windows</td></tr>
+  <tr><td><a href="http://lighttable.com/">Light Table</a></td>
+    <td>Cross-platform; very good for editing Clojure</td></tr>
+  <tr><td><a href="https://www.jetbrains.com/idea/">IntelliJ IDEA</a> (with <a href="https://cursiveclojure.com/">Cursive</a> plugin)</td>
+    <td>Cross-platform</td></tr>
+  <tr><td><a href="http://www.vim.org/">vim</a></td>
+    <td>cross-platform</td></tr>
+  <tr><td><a href="http://www.gnu.org/software/emacs/">GNU emacs</a></td>
+    <td>cross-platform</td></tr>
+  </tbody>
+</table>
+
+<h2>HTML for Second Example</h2>
+<p>
+At some point, we will be creating a project to do basic statistics. To save you some time and lots of typing, you will replace the <em>index.html</em> file in the project&#8217;s <em>resources/public</em> directory with this HTML.
+</p>
+
+<div class="inset bordered"><pre>&lt;!DOCTYPE html&gt;
+&lt;html&gt;
+  &lt;head&gt;
+    &lt;meta charset="UTF-8"&gt;
+    &lt;meta name="viewport" content="width=device-width, initial-scale=1"&gt;    
+    &lt;link href="css/style.css" rel="stylesheet" type="text/css"&gt;
+    &lt;title&gt;Statistics&lt;/title&gt;
+  &lt;/head&gt;
+  &lt;body&gt;
+    &lt;div id="app"&gt;
+      &lt;h1&gt;Statistics&lt;/h1&gt;
+      &lt;p&gt;Enter a list of numbers separated by blanks or commas:&lt;br/&gt;
+        &lt;input type="text" size="40" id="numbers"/&gt;
+        &lt;input type="button" id="calculate" value="Calculate"/&gt;
+      &lt;/p&gt;
+
+      &lt;p&gt;
+      Mean: &lt;span id="mean"&gt;&lt;/span&gt;&lt;br /&gt;
+      Standard deviation: &lt;span id="stdv"&gt;&lt;/span&gt;
+      &lt;/p&gt;
+
+    &lt;/div&gt;
+    &lt;script src="js/compiled/stats.js" type="text/javascript"&gt;&lt;/script&gt;
+  &lt;/body&gt;
+&lt;/html&gt;</pre></div>
+</body>
+</html>
