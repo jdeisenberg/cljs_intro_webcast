@@ -1,6 +1,6 @@
 # Additional Notes
 
-During the webcast, someone asked “For what sorts of projects is functional programming better suited that imperative programming?” I didn’t have a good answer at the moment, and noted that it’s something of a theological issue. I recommended that the person do a search for *functional vs. imperative programming* and see what people on both sides of the issue thought.
+During the webcast, someone asked “For what sorts of projects is functional programming better suited than imperative programming?” I didn’t have a good answer at the moment, and noted that it’s something of a theological issue. I recommended that the person do a search for *functional vs. imperative programming* and see what people on both sides of the issue thought.
 
 After some reflection, there is a better answer. Whether you are programming in functional or imperative style, it makes sense to separate the pure functions from those with side effects. Functions that are pure and don’t change global state are great for programs that use concurrency--you don’t have to worry about another process changing some value that you depend upon, because values are immutable. In imperative languages, you have to do some extra work to make sure that you keep things pure; in many functional languages that’s the default. For example, [Erlang](http://www.erlang.org/) is designed with those principles in mind to enable massive concurrency with literally tens of thousands of lightweight processes as the norm.
 
